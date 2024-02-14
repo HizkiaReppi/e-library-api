@@ -9,6 +9,7 @@ import {
   SwaggerConfig,
 } from './common/configs/config.interface'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { HttpExceptionFilter } from './filters/http-exception.filter'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -18,6 +19,7 @@ async function bootstrap() {
   // Prisma Client Exception Filter for unhandled exceptions
   const { httpAdapter } = app.get(HttpAdapterHost)
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter))
+  app.useGlobalFilters(new HttpExceptionFilter())
 
   // Configurations
   const configService = app.get(ConfigService)
