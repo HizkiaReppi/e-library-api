@@ -19,3 +19,9 @@ export interface Pagination {
   page: number
   limit: number
 }
+
+export interface NoDataResponse {
+  status: boolean
+  code: number
+  message: string
+}

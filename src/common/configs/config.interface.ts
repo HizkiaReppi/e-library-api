@@ -23,6 +23,7 @@ export interface SwaggerConfig {
 
 export interface SecurityConfig {
   secret: string
+  refreshSecret: string
   expiresIn: string
   refreshIn: string
   bcryptSaltOrRound: string | number

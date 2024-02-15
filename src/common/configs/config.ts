@@ -16,6 +16,7 @@ const config: Config = {
   },
   security: {
     secret: process.env.JWT_SECRET,
+    refreshSecret: process.env.JWT_REFRESH_SECRET,
     expiresIn: process.env.JWT_EXPIRES_IN || '1d',
     refreshIn: process.env.JWT_REFRESH_IN || '7d',
     bcryptSaltOrRound: process.env.BCRYPT_SALT_OR_ROUND || 10,

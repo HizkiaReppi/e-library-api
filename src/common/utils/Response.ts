@@ -2,6 +2,7 @@ import {
   SuccessResponse,
   ErrorResponse,
   Pagination,
+  NoDataResponse,
 } from './response.interface'
 
 export default class Response {
@@ -43,6 +44,14 @@ export default class Response {
         page,
         limit,
       },
+    }
+  }
+
+  public static noData({ status, code, message }: NoDataResponse) {
+    return {
+      status,
+      code,
+      message,
     }
   }
 }
