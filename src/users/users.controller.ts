@@ -88,17 +88,18 @@ export class UsersController {
   })
   async findAll(@Query('limit') limit?: number, @Query('page') page?: number) {
     try {
-      limit = limit ? limit : 10
-      page = page ? page : 1
+      limit = limit ? +limit : 10
+      page = page ? +page : 1
 
       const data = await this.usersService.findAll(limit, page)
+      const totalData = await this.usersService.countData()
 
       return Response.getDataWithPagination({
         code: HttpStatus.OK,
         message: 'Data has been retrieved successfully',
         data,
-        totalData: data.length,
-        totalPage: Math.ceil(data.length / limit),
+        totalData,
+        totalPage: Math.ceil(totalData / limit),
         page,
         limit,
       })
