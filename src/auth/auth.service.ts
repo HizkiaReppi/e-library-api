@@ -32,7 +32,11 @@ export class AuthService {
       password: hashedPassword,
     })
 
-    const tokens = await this.getTokens(newUser.id, newUser.username)
+    const tokens = await this.getTokens(
+      newUser.id,
+      newUser.username,
+      newUser.role,
+    )
     await this.updateRefreshToken(newUser.id, tokens.refreshToken)
 
     return tokens
@@ -48,7 +52,7 @@ export class AuthService {
       throw new BadRequestException('Username or password is incorrect')
     }
 
-    const tokens = await this.getTokens(user.id, user.username)
+    const tokens = await this.getTokens(user.id, user.username, user.role)
     await this.updateRefreshToken(user.id, tokens.refreshToken)
 
     return tokens
@@ -58,19 +62,20 @@ export class AuthService {
     return this.usersService.update(userId, { refreshToken: null })
   }
 
-  async updateRefreshToken(userId: string, refreshToken: string) {
+  private async updateRefreshToken(userId: string, refreshToken: string) {
     const hashedRefreshToken = await this.bcryptService.hashData(refreshToken)
     await this.usersService.update(userId, {
       refreshToken: hashedRefreshToken,
     })
   }
 
-  async getTokens(userId: string, username: string) {
+  private async getTokens(userId: string, username: string, role: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         {
           sub: userId,
           username,
+          role,
         },
         {
           secret: this.configService.get<string>('security.secret'),
@@ -81,6 +86,7 @@ export class AuthService {
         {
           sub: userId,
           username,
+          role,
         },
         {
           secret: this.configService.get<string>('security.refreshSecret'),

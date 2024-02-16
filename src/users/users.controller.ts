@@ -9,6 +9,7 @@ import {
   Query,
   HttpStatus,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common'
 import {
   ApiBearerAuth,
@@ -23,10 +24,16 @@ import { CreateUserDto, CreateUserResponseDto } from './dto/create-user.dto'
 import { GetAllUsersResponseDto } from './dto/GetAllUsersResponse.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { Public } from '@/decorator/public.decorator'
+import { Role } from '@/common/enums/role.enum'
+import { Roles } from '@/decorator/roles.decorator'
 import Response from '@/common/utils/Response'
+import { JwtAuthGuard } from '@/guards/jwt-auth.guard'
+import { RolesGuard } from '@/guards/role.guard'
 
 @ApiTags('users')
 @Controller('users')
+@UseGuards(JwtAuthGuard)
+@UseGuards(RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -40,6 +47,7 @@ export class UsersController {
     description: 'Data has been created successfully',
     type: CreateUserResponseDto,
   })
+  @Roles(Role.ADMIN, Role.SUPERADMIN)
   create(@Body() createUserDto: CreateUserDto) {
     try {
       return this.usersService.create(createUserDto)
@@ -99,6 +107,7 @@ export class UsersController {
 
   @Get(':id')
   @ApiBearerAuth()
+  @Roles(Role.USER, Role.ADMIN, Role.SUPERADMIN)
   async findOne(@Param('id') id: string) {
     try {
       const data = await this.usersService.findById(id)
@@ -118,6 +127,7 @@ export class UsersController {
 
   @Patch(':id')
   @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.SUPERADMIN)
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     try {
       const updatedData = await this.usersService.update(id, updateUserDto)
@@ -137,6 +147,7 @@ export class UsersController {
 
   @Delete(':id')
   @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.SUPERADMIN)
   async remove(@Param('id') id: string) {
     try {
       await this.usersService.deactivate(id)
@@ -158,6 +169,7 @@ export class UsersController {
   // TODO: Add role middleware to check if the user is an super-admin
   @Delete(':id/force-delete')
   @ApiBearerAuth()
+  @Roles(Role.SUPERADMIN)
   async forceDelete(@Param('id') id: string) {
     try {
       await this.usersService.remove(id)
