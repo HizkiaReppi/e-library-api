@@ -6,10 +6,14 @@ import {
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { PrismaService } from '@/common/utils/prisma.service'
+import { BcryptService } from '@/common/utils/bcrypt.service'
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private bcryptService: BcryptService,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     const username = await this.findByUsername(createUserDto.username)
@@ -18,8 +22,12 @@ export class UsersService {
     const email = await this.findByEmail(createUserDto.email)
     if (email) throw new BadRequestException('Email already exists')
 
+    const hashedPassword = await this.bcryptService.hashData(
+      createUserDto.password,
+    )
+
     return this.prisma.user.create({
-      data: createUserDto,
+      data: { ...createUserDto, password: hashedPassword },
       select: {
         id: true,
         name: true,
@@ -68,9 +76,13 @@ export class UsersService {
     const data = await this.findById(id)
     await this.checkData(data)
 
+    const hashedPassword = await this.bcryptService.hashData(
+      updateUserDto.password,
+    )
+
     return this.prisma.user.update({
       where: { id },
-      data: updateUserDto,
+      data: { ...updateUserDto, password: hashedPassword },
       select: {
         id: true,
         name: true,

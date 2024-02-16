@@ -23,14 +23,7 @@ export class AuthService {
     const emailExists = await this.usersService.findByEmail(createUserDto.email)
     if (emailExists) throw new BadRequestException('Email already exists')
 
-    const hashedPassword = await this.bcryptService.hashData(
-      createUserDto.password,
-    )
-
-    const newUser = await this.usersService.create({
-      ...createUserDto,
-      password: hashedPassword,
-    })
+    const newUser = await this.usersService.create(createUserDto)
 
     const tokens = await this.getTokens(
       newUser.id,

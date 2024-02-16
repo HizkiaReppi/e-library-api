@@ -48,9 +48,15 @@ export class UsersController {
     type: CreateUserResponseDto,
   })
   @Roles(Role.ADMIN, Role.SUPERADMIN)
-  create(@Body() createUserDto: CreateUserDto) {
+  async create(@Body() createUserDto: CreateUserDto) {
     try {
-      return this.usersService.create(createUserDto)
+      const data = await this.usersService.create(createUserDto)
+
+      return Response.success({
+        code: HttpStatus.CREATED,
+        message: 'Data has been created successfully',
+        data,
+      })
     } catch (error) {
       return Response.error({
         code: HttpStatus.BAD_REQUEST,
@@ -166,7 +172,6 @@ export class UsersController {
   }
 
   // This method is used to delete data permanently and only for super-admin
-  // TODO: Add role middleware to check if the user is an super-admin
   @Delete(':id/force-delete')
   @ApiBearerAuth()
   @Roles(Role.SUPERADMIN)
