@@ -15,10 +15,13 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
   async signUp(createUserDto: CreateUserDto): Promise<any> {
-    const userExists = await this.usersService.findByUsername(
+    const usernameExists = await this.usersService.findByUsername(
       createUserDto.username,
     )
-    if (userExists) throw new BadRequestException('User already exists')
+    if (usernameExists) throw new BadRequestException('Username already exists')
+
+    const emailExists = await this.usersService.findByEmail(createUserDto.email)
+    if (emailExists) throw new BadRequestException('Email already exists')
 
     const hashedPassword = await this.bcryptService.hashData(
       createUserDto.password,
@@ -37,15 +40,11 @@ export class AuthService {
 
   async signIn(data: SignInDto) {
     const user = await this.usersService.findByUsername(data.username)
-    if (!user) {
-      throw new BadRequestException('Username or password is incorrect')
-    }
 
-    const passwordMatches = await this.bcryptService.compareData(
-      data.password,
-      user.password,
-    )
-    if (!passwordMatches) {
+    if (
+      !user ||
+      !(await this.bcryptService.compareData(data.password, user.password))
+    ) {
       throw new BadRequestException('Username or password is incorrect')
     }
 

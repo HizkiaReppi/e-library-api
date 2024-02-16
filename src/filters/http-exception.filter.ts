@@ -32,6 +32,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
       )
     }
 
+    if (status === 401) {
+      return response.status(status).send(
+        Response.noData({
+          status: false,
+          code: status,
+          message: exception.message,
+        }),
+      )
+    }
+
     response.status(status).send(
       Response.error({
         code: status,

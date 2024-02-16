@@ -5,11 +5,15 @@ import {
   HttpStatus,
   Post,
   Req,
+  UseGuards,
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { CreateUserDto } from '@/users/dto/create-user.dto'
 import Response from '@/common/utils/Response'
 import { Request } from 'express'
+import { JwtAuthGuard } from '@/guards/jwt-auth.guard'
+import { Public } from '@/decorator/public.decorator'
+import { SignInDto } from './dto/sign-in.dto'
 
 @Controller('auth')
 export class AuthController {
@@ -17,6 +21,7 @@ export class AuthController {
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
+  @Public()
   async signUp(@Body() createUserDto: CreateUserDto) {
     const tokens = await this.authService.signUp(createUserDto)
     return Response.success({
@@ -27,8 +32,9 @@ export class AuthController {
   }
 
   @Post('signin')
-  async signIn(@Body() data: any) {
-    const tokens = await this.authService.signIn(data)
+  @Public()
+  async signIn(@Body() signInDto: SignInDto) {
+    const tokens = await this.authService.signIn(signInDto)
     return Response.success({
       code: HttpStatus.OK,
       message: 'Login success',
@@ -38,6 +44,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
   async logout(@Req() req: Request) {
     await this.authService.logout(req.user['sub'])
     return Response.noData({
