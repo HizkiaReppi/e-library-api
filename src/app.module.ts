@@ -8,6 +8,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { SharedModule } from './common/shared/shared.module'
 import { RolesGuard } from './guards/role.guard'
 import { CategoriesModule } from './categories/categories.module'
+import { BooksModule } from './books/books.module'
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CategoriesModule } from './categories/categories.module'
     AuthModule,
     SharedModule,
     CategoriesModule,
+    BooksModule,
   ],
   controllers: [],
   providers: [
