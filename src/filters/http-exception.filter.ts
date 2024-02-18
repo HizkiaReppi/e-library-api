@@ -32,7 +32,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       )
     }
 
-    if (status === 401) {
+    if (status === 400 || status === 404) {
       return response.status(status).send(
         Response.noData({
           status: false,

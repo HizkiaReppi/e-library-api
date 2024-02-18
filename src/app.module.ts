@@ -7,6 +7,7 @@ import { APP_GUARD } from '@nestjs/core'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { SharedModule } from './common/shared/shared.module'
 import { RolesGuard } from './guards/role.guard'
+import { CategoriesModule } from './categories/categories.module'
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { RolesGuard } from './guards/role.guard'
     UsersModule,
     AuthModule,
     SharedModule,
+    CategoriesModule,
   ],
   controllers: [],
   providers: [
