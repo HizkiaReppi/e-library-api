@@ -11,18 +11,31 @@ import { PrismaService } from '@/common/utils/prisma.service'
 export class BooksService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createBookDto: CreateBookDto) {
+  async create(
+    createBookDto: CreateBookDto,
+    pdf?: Express.Multer.File,
+    cover?: Express.Multer.File,
+  ) {
     const isbn = createBookDto.isbn
     const isIsbnExist = await this.prisma.book.findUnique({ where: { isbn } })
     if (isIsbnExist) throw new ConflictException('Isbn already exist')
+
+    createBookDto.publishedAt = +createBookDto.publishedAt
+    createBookDto.totalBooks = +createBookDto.totalBooks
 
     const isCategoryExist = await this.prisma.category.findUnique({
       where: { id: createBookDto.categoryId },
     })
     if (!isCategoryExist) throw new NotFoundException('Category not found')
 
+    const data = {
+      ...createBookDto,
+      file: pdf ? pdf[0].destination + pdf[0].filename : null,
+      cover: cover ? cover[0].destination + cover[0].filename : null,
+    }
+
     return this.prisma.book.create({
-      data: createBookDto,
+      data,
     })
   }
 

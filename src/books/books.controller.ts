@@ -9,7 +9,11 @@ import {
   Query,
   HttpCode,
   Res,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common'
+import { FileFieldsInterceptor } from '@nestjs/platform-express'
+import { Express } from 'express'
 import { Response as ExpressResponse } from 'express'
 import { BooksService } from './books.service'
 import { CreateBookDto } from './dto/create-book.dto'
@@ -21,11 +25,26 @@ export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Post()
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'pdf', maxCount: 1 },
+      { name: 'cover', maxCount: 1 },
+    ]),
+  )
   async create(
     @Body() createBookDto: CreateBookDto,
+    @UploadedFiles()
+    files: {
+      pdf: Express.Multer.File
+      cover: Express.Multer.File
+    },
     @Res() res: ExpressResponse,
   ) {
-    const data = await this.booksService.create(createBookDto)
+    const data = await this.booksService.create(
+      createBookDto,
+      files.pdf,
+      files.cover,
+    )
 
     res.location(`/books/${data.id}`).send(
       Response.success({

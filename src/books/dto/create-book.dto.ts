@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsInt, Min, Max, Length } from 'class-validator'
+import { IsNotEmpty, IsString, Length } from 'class-validator'
 
 export class CreateBookDto {
   @IsString()
@@ -24,25 +24,15 @@ export class CreateBookDto {
   @Length(3, 191)
   publisher: string
 
-  @IsInt()
-  @Min(1)
-  @Max(new Date().getFullYear())
   publishedAt: number
 
-  @IsInt()
-  @Min(1)
-  @Max(999)
   totalBooks: number
 
   @IsString()
   @Length(0, 191)
   description: string
 
-  @IsString()
-  @Length(0, 191)
   cover: string
 
-  @IsString()
-  @Length(0, 191)
   file: string
 }

@@ -3,6 +3,7 @@ import { AppModule } from './app.module'
 import { ValidationPipe, VersioningType } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PrismaClientExceptionFilter } from 'nestjs-prisma'
+import { NestExpressApplication } from '@nestjs/platform-express'
 import {
   CorsConfig,
   NestConfig,
@@ -12,7 +13,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { HttpExceptionFilter } from './filters/http-exception.filter'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create<NestExpressApplication>(AppModule)
 
   app.useGlobalPipes(new ValidationPipe())
 
