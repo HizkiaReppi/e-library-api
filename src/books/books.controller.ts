@@ -124,8 +124,27 @@ export class BooksController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
-    const data = await this.booksService.update(id, updateBookDto)
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'pdf', maxCount: 1 },
+      { name: 'cover', maxCount: 1 },
+    ]),
+  )
+  async update(
+    @Param('id') id: string,
+    @Body() updateBookDto: UpdateBookDto,
+    @UploadedFiles()
+    files: {
+      pdf: Express.Multer.File
+      cover: Express.Multer.File
+    },
+  ) {
+    const data = await this.booksService.update(
+      id,
+      updateBookDto,
+      files.pdf,
+      files.cover,
+    )
 
     return Response.success({
       code: 201,

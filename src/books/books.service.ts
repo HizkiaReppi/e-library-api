@@ -1,3 +1,4 @@
+import * as fs from 'fs'
 import {
   ConflictException,
   Injectable,
@@ -67,14 +68,33 @@ export class BooksService {
     return data
   }
 
-  async update(id: string, updateBookDto: UpdateBookDto) {
+  async update(
+    id: string,
+    updateBookDto: UpdateBookDto,
+    pdf?: Express.Multer.File,
+    cover?: Express.Multer.File,
+  ) {
     const data = await this.findById(id)
     await this.checkData(data)
 
-    return this.prisma.book.update({
+    const updatedData = await this.prisma.book.update({
       where: { id },
-      data: updateBookDto,
+      data: {
+        ...updateBookDto,
+        file: pdf ? pdf[0].destination + pdf[0].filename : data.file,
+        cover: cover ? cover[0].destination + cover[0].filename : data.cover,
+      },
     })
+
+    if (pdf && pdf[0].destination + pdf[0].filename !== data.file) {
+      fs.unlinkSync(data.file)
+    }
+
+    if (cover && cover[0].destination + cover[0].filename !== data.cover) {
+      fs.unlinkSync(data.cover)
+    }
+
+    return updatedData
   }
 
   async remove(id: string) {
