@@ -3,21 +3,24 @@ import { AppModule } from './app.module'
 import { ValidationPipe, VersioningType } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PrismaClientExceptionFilter } from 'nestjs-prisma'
+import { NestExpressApplication } from '@nestjs/platform-express'
 import {
   CorsConfig,
   NestConfig,
   SwaggerConfig,
 } from './common/configs/config.interface'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { HttpExceptionFilter } from './filters/http-exception.filter'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create<NestExpressApplication>(AppModule)
 
   app.useGlobalPipes(new ValidationPipe())
 
   // Prisma Client Exception Filter for unhandled exceptions
   const { httpAdapter } = app.get(HttpAdapterHost)
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter))
+  app.useGlobalFilters(new HttpExceptionFilter())
 
   // Configurations
   const configService = app.get(ConfigService)

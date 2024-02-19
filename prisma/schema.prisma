@@ -6,6 +6,58 @@ generator client {
 }
 
 datasource db {
-  provider = env("DATABASE_TYPE")
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String      @id @default(uuid())
+  username      String      @unique
+  email         String      @unique
+  name          String    
+  password      String    
+  role          Role        @default(USER)
+  isActive      Boolean     @default(true)
+  lastLogin     DateTime?
+  refreshToken  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("users")
+}
+
+model Book {
+  id          String   @id @default(uuid())
+  categoryId  String
+  isbn        String   @unique
+  title       String
+  author      String
+  description String?
+  publisher   String
+  publishedAt Int      @db.Year
+  totalBooks  Int      @db.SmallInt
+  cover       String?
+  file        String?
+  Category    Category @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("books")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Book        Book[]
+
+  @@map("categories")
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
 }
