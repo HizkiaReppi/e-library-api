@@ -13,8 +13,7 @@ import {
   UploadedFiles,
 } from '@nestjs/common'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
-import { Express } from 'express'
-import { Response as ExpressResponse } from 'express'
+import { Express, Response as ExpressResponse } from 'express'
 import { BooksService } from './books.service'
 import { CreateBookDto } from './dto/create-book.dto'
 import { UpdateBookDto } from './dto/update-book.dto'

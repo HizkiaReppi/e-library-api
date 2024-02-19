@@ -101,7 +101,14 @@ export class BooksService {
     const data = await this.findById(id)
     await this.checkData(data)
 
-    return this.prisma.book.delete({ where: { id } })
+    const success = await this.prisma.book.delete({ where: { id } })
+
+    if (success) {
+      fs.unlinkSync(data.file)
+      fs.unlinkSync(data.cover)
+    }
+
+    return success
   }
 
   async findManyByCategoryId(categoryId: string, limit: number, page: number) {
