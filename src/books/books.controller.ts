@@ -17,6 +17,7 @@ import { Express, Response as ExpressResponse } from 'express'
 import { BooksService } from './books.service'
 import { CreateBookDto } from './dto/create-book.dto'
 import { UpdateBookDto } from './dto/update-book.dto'
+import { Public } from '@/decorator/public.decorator'
 import Response from '@/common/utils/Response'
 
 @Controller('books')
@@ -55,6 +56,7 @@ export class BooksController {
   }
 
   @Get()
+  @Public()
   async findAll(@Query('limit') limit?: number, @Query('page') page?: number) {
     limit = limit ? +limit : 10
     page = page ? +page : 1
@@ -74,6 +76,7 @@ export class BooksController {
   }
 
   @Get(':id')
+  @Public()
   async findOne(@Param('id') id: string) {
     const data = await this.booksService.findById(id)
 
@@ -85,6 +88,7 @@ export class BooksController {
   }
 
   @Get('isbn/:isbn')
+  @Public()
   async findIsbn(@Param('isbn') isbn: string) {
     const data = await this.booksService.findByIsbn(isbn)
 
@@ -96,6 +100,7 @@ export class BooksController {
   }
 
   @Get('category/:categoryId')
+  @Public()
   async findManyByCategoryId(
     @Param('categoryId') categoryId: string,
     @Query('limit') limit?: number,
@@ -120,6 +125,13 @@ export class BooksController {
       limit,
       page,
     })
+  }
+
+  @Get('file/:id')
+  async getFile(@Param('id') id: string, @Res() res: ExpressResponse) {
+    const file = await this.booksService.getFile(id)
+
+    res.download(file.file)
   }
 
   @Patch(':id')

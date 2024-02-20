@@ -130,6 +130,16 @@ export class BooksService {
     return data
   }
 
+  async getFile(id: string) {
+    const file = await this.prisma.book.findUnique({
+      where: { id },
+      select: { file: true },
+    })
+    await this.checkData(file)
+
+    return file
+  }
+
   async countData() {
     return this.prisma.book.count()
   }
