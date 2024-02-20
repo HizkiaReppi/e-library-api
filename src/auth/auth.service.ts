@@ -45,6 +45,9 @@ export class AuthService {
       throw new BadRequestException('Username or password is incorrect')
     }
 
+    // update lastlogin
+    await this.usersService.update(user.id, { lastLogin: new Date() })
+
     const tokens = await this.getTokens(user.id, user.username, user.role)
     await this.updateRefreshToken(user.id, tokens.refreshToken)
 

@@ -45,6 +45,7 @@ export class UsersService {
     return this.prisma.user.findMany({
       take: limit,
       skip,
+      where: { isActive: true },
       orderBy: { name: 'asc' },
       select: {
         id: true,
@@ -57,8 +58,31 @@ export class UsersService {
     })
   }
 
+  async findAllData(limit: number, page: number) {
+    const skip = (page - 1) * limit
+
+    return this.prisma.user.findMany({
+      take: limit,
+      skip,
+      orderBy: { name: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        email: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    })
+  }
+
   async findById(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id } })
+    const user = await this.prisma.user.findUnique({
+      where: { id, isActive: true },
+    })
+    await this.checkData(user)
     return user
   }
 
@@ -73,8 +97,7 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    const data = await this.findById(id)
-    await this.checkData(data)
+    await this.findById(id)
 
     if (updateUserDto.password) {
       updateUserDto.password = await this.bcryptService.hashData(
@@ -98,15 +121,11 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    const data = await this.findById(id)
-    await this.checkData(data)
-
     return this.prisma.user.delete({ where: { id } })
   }
 
   async activate(id: string) {
-    const data = await this.findById(id)
-    await this.checkData(data)
+    await this.findById(id)
 
     return this.prisma.user.update({
       where: { id },
@@ -116,8 +135,7 @@ export class UsersService {
   }
 
   async deactivate(id: string) {
-    const data = await this.findById(id)
-    await this.checkData(data)
+    await this.findById(id)
 
     return this.prisma.user.update({
       where: { id },
@@ -126,8 +144,9 @@ export class UsersService {
     })
   }
 
-  async countData(): Promise<number> {
-    return this.prisma.user.count()
+  async countData(isActive?: boolean): Promise<number> {
+    const where = isActive ? { isActive } : {}
+    return this.prisma.user.count({ where })
   }
 
   private async checkData(data: any) {

@@ -49,21 +49,13 @@ export class UsersController {
   })
   @Roles(Role.ADMIN, Role.SUPERADMIN)
   async create(@Body() createUserDto: CreateUserDto) {
-    try {
-      const data = await this.usersService.create(createUserDto)
+    const data = await this.usersService.create(createUserDto)
 
-      return Response.success({
-        code: HttpStatus.CREATED,
-        message: 'Data has been created successfully',
-        data,
-      })
-    } catch (error) {
-      return Response.error({
-        code: HttpStatus.BAD_REQUEST,
-        error: error.message,
-        data: null,
-      })
-    }
+    return Response.success({
+      code: HttpStatus.CREATED,
+      message: 'Data has been created successfully',
+      data,
+    })
   }
 
   @Get()
@@ -87,109 +79,110 @@ export class UsersController {
     type: GetAllUsersResponseDto,
   })
   async findAll(@Query('limit') limit?: number, @Query('page') page?: number) {
-    try {
-      limit = limit ? +limit : 10
-      page = page ? +page : 1
+    limit = limit ? +limit : 10
+    page = page ? +page : 1
 
-      const data = await this.usersService.findAll(limit, page)
-      const totalData = await this.usersService.countData()
+    const data = await this.usersService.findAll(limit, page)
+    const totalData = await this.usersService.countData(true)
 
-      return Response.getDataWithPagination({
-        code: HttpStatus.OK,
-        message: 'Data has been retrieved successfully',
-        data,
-        totalData,
-        totalPage: Math.ceil(totalData / limit),
-        page,
-        limit,
-      })
-    } catch (error) {
-      return Response.error({
-        code: HttpStatus.BAD_REQUEST,
-        error: error.message,
-        data: null,
-      })
-    }
+    return Response.getDataWithPagination({
+      code: HttpStatus.OK,
+      message: 'Data has been retrieved successfully',
+      data,
+      totalData,
+      totalPage: Math.ceil(totalData / limit),
+      page,
+      limit,
+    })
+  }
+
+  // findAllData only for superadmin
+  @Get('all')
+  @ApiBearerAuth()
+  @Roles(Role.SUPERADMIN)
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Limit of results per page',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number of the results',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Data has been retrieved successfully',
+    type: GetAllUsersResponseDto,
+  })
+  async findAllData(
+    @Query('limit') limit?: number,
+    @Query('page') page?: number,
+  ) {
+    limit = limit ? +limit : 10
+    page = page ? +page : 1
+
+    const data = await this.usersService.findAllData(limit, page)
+    const totalData = await this.usersService.countData()
+
+    return Response.getDataWithPagination({
+      code: HttpStatus.OK,
+      message: 'Data has been retrieved successfully',
+      data,
+      totalData,
+      totalPage: Math.ceil(totalData / limit),
+      page,
+      limit,
+    })
   }
 
   @Get(':id')
   @ApiBearerAuth()
   @Roles(Role.USER, Role.ADMIN, Role.SUPERADMIN)
   async findOne(@Param('id') id: string) {
-    try {
-      const data = await this.usersService.findById(id)
-      return Response.success({
-        code: HttpStatus.OK,
-        message: 'Data has been retrieved successfully',
-        data,
-      })
-    } catch (error) {
-      return Response.error({
-        code: HttpStatus.BAD_REQUEST,
-        error: error.message,
-        data: null,
-      })
-    }
+    const data = await this.usersService.findById(id)
+    return Response.success({
+      code: HttpStatus.OK,
+      message: 'Data has been retrieved successfully',
+      data,
+    })
   }
 
   @Patch(':id')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.SUPERADMIN)
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    try {
-      const updatedData = await this.usersService.update(id, updateUserDto)
-      return Response.success({
-        code: HttpStatus.OK,
-        message: 'Data has been updated successfully',
-        data: updatedData,
-      })
-    } catch (error) {
-      return Response.error({
-        code: HttpStatus.BAD_REQUEST,
-        error: error.message,
-        data: null,
-      })
-    }
+    const updatedData = await this.usersService.update(id, updateUserDto)
+    return Response.success({
+      code: HttpStatus.OK,
+      message: 'Data has been updated successfully',
+      data: updatedData,
+    })
   }
 
   @Delete(':id')
   @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(Role.ADMIN, Role.SUPERADMIN)
   async remove(@Param('id') id: string) {
-    try {
-      await this.usersService.deactivate(id)
-      return Response.noData({
-        status: true,
-        code: HttpStatus.NO_CONTENT,
-        message: 'Data has been deleted successfully',
-      })
-    } catch (error) {
-      return Response.error({
-        code: HttpStatus.BAD_REQUEST,
-        error: error.message,
-        data: null,
-      })
-    }
+    return this.usersService.deactivate(id)
   }
 
-  // This method is used to delete data permanently and only for super-admin
+  @Patch(':id/activate')
+  @ApiBearerAuth()
+  @Roles(Role.SUPERADMIN)
+  async activate(@Param('id') id: string) {
+    return this.usersService.activate(id)
+  }
+
   @Delete(':id/force-delete')
   @ApiBearerAuth()
   @Roles(Role.SUPERADMIN)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async forceDelete(@Param('id') id: string) {
-    try {
-      await this.usersService.remove(id)
-      return Response.noData({
-        status: true,
-        code: HttpStatus.NO_CONTENT,
-        message: 'Data has been deleted successfully',
-      })
-    } catch (error) {
-      return Response.error({
-        code: HttpStatus.BAD_REQUEST,
-        error: error.message,
-        data: null,
-      })
-    }
+    return this.usersService.remove(id)
   }
 }

@@ -59,6 +59,8 @@ export class CreateUserDto {
   password: string
 
   refreshToken: string
+
+  lastLogin: Date
 }
 
 export class CreateUserResponseDto {
